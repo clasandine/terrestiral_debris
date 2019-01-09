@@ -1,0 +1,117 @@
+#This section finds the mars embryo 
+#import modules for plotting and opening directories in quest
+from os import chdir, remove, walk, getcwd
+#Matplotlib chooses Xwindows backend by default. Matplotlib needs to be set to not use the Xwindows backend. This is done with the next two lines of code
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+#change directory to where all the simulations are, along with providing the path that will be looped through
+path = '/projects/b1068/claudia/smashGT-goodruns/'
+chdir('/projects/b1068/claudia/smashGT-goodruns/')
+#loop through all the simulations, which have necessary data in the CONT directory which is contained within the simulation directory
+for path,subdir,files in walk(path):
+	for name in subdir:
+		if name.endswith('CONT'):
+			chdir(path)
+			chdir('CONT')
+#each directory is printed in order to see which directories are completed and when
+ 			print(getcwd())
+#create a variable equal to the number of lines in the file we open
+			num_lines = sum(1 for line in open('follow.all'))
+ 			num_lines2 = sum(1 for line in open('debris.dat'))
+#remove any files with the name of the file we want to make, in case previous unimportant files with that name were placed here
+			try:
+				remove('Mars.txt')
+			except OSError:
+				pass
+#this file contains all debris created, so we want to mark the first index where debris is created
+			with open('debris.dat', 'r', newline='') as data:
+				readthelines = data.read()
+				array = readthelines.split()
+				debris = list(map(float,array))
+				initial_debris = debris[3]
+#open file and split lines so that each element in the file is now the element of an array
+			with open('follow.all', 'r', newline='') as data:
+				readthelines = data.read()
+				array = readthelines.split()
+#convert elements in the list into floats for computational purposes
+ 				follow = list(map(float,array))
+#create empty lists to be used to store orbital data
+				aphelion = []
+				index = []
+				count = []
+				for i in range(0, num_lines-1):
+#Makes sure we use data from the correct time which is 200,600,000 yrs
+ 					if follow[6*i] == 200600000:
+#making sure to only use particles with theses parameters for the masses to get the embryos in the inner solar system
+						if follow[6*i+5] > 1.00E-02 and follow[6*i+5] < 90:
+							aphelion.append(float(follow[6*i+2]*(1+follow[6*i+3])))
+							index.append(follow[6*i+1])
+							count.append(i)
+#finds embryo with the largest aphelion, which is the mars
+				max_value = max(aphelion)
+				x = aphelion.index(max(aphelion))
+				mars_index = index[x]
+				i = int(count[x])
+#creates value for the minimum perihelion of debris to be considered to be in the Asteroid Belt
+#0.1 is added to account for the Hungaria group of asteroids
+ 				peri_boundary = max_value + 0.1
+#opens file to keep information on the Mars of the simulation
+ 				mars = open('Mars.txt', 'a+')
+#File will contain three columns, from left to right: particle number, mass, semi-major axis
+ 				mars.write(str(mars_index) + ' ' + str(follow[6*i+5]) + ' ' + str(follow[6*i+2]))
+ 				mars.close()
+#Determining which asteroids survived in the asteroid belt using mars parameters
+				for i in range (0, num_lines-1):
+ 					if follow[6*i] == 200600000:
+#First parameter is semi-major axis, second is perihelion, third is mass, and fourth is starting at the index of the debris because preceding indexes are embryos or planetesimals
+ 						if float(follow[6*i+2]) < 5 and float(follow[6*i+2])*(1-float(follow[4*i+3])) > float(peri_boundary) and follow[6*i+5] < 1.00E-02 and follow[6*i+1] >= initial_debris:
+ 							marsresult = open('mars_asteroid_belt.txt', 'a+')
+#File contains five colums, from left ot right: particle number, mass, semi-major axis, eccentricity, inclination
+							marsresult.write(str(follow[6*i+1]) + ' ' + str(follow[6*i+5]) + ' ' + str(follow[6*i+2]) + ' ' + str( follow[6*i+3]) + ' ' + str( follow[6*i+4]) + '\n')
+ 							marsresult.close()
+#making the histogram for total mass of debris in the asteroid belt
+total_mass_debris = []
+for path,subdir,files in walk(path):
+	for name in subdir:
+		if name.endswith('CONT'):
+			chdir(path)
+			chdir('CONT')
+			num_lines3 = sum(1 for line in open('mars_asteroid_belt.txt'))
+#Obtain the masses for every debris particle created from the file just made
+			with open('mars_asteroid_belt.txt', 'r', newline='') as data2:
+				readlines = data2.read()
+				array2 = readlines.split()
+				asteroid_belt = list(map(float,array2))
+				add_mass = []
+#appends individual masses of each debris particle to a list, the sum of that list is the total mass of debris in the simulation
+				for i in range(0, num_lines3-1):
+					add_mass.append(asteroid_belt[5*i+1])
+			total_mass = sum(add_mass)
+			total_mass_asteroid = total_mass/0.000492
+			total_mass_debris.append(total_mass_asteroid)
+#changing location to where I want the histogram saved
+chdir('/projects/b1068/claudia/imperfect/solarsystem')
+plt.hist(total_mass_debris, edgecolor = 'black', bins=14)
+plt.xlabel('Total Mass of Debris Emplaced in the Asteroid Belt (Earth Masses)')
+plt.ylabel('Number of Simulations')
+plt.savefig('total_mass_histogram.pdf')
+#making histogram for total percentage of debris emplaced in the asteroid belt compared to total debris created
+chdir('/projects/b1068/claudia/smashGT-goodruns')
+percentage = []
+for path,subdir,files in walk(path):
+	for name in subdir:
+		if name.endswith('CONT'):
+			chdir(path)
+			chdir('CONT')
+			print(getcwd())
+			num_lines2 = sum(1 for line in open('debris.dat'))
+			num_lines3 = sum(1 for line in open('mars_asteroid_belt.txt'))
+#using number in lines previously calculated from mars_asteroid_belt.txt and debris.dat
+#debris.dat contains all debris particles, mars_asteroid_belt.txt contains all debris in the asteroid belt
+			percentage.append(num_lines3/num_lines2*100)
+chdir('/projects/b1068/claudia/imperfect/solarsystem')
+plt.hist(percentage, edgecolor = 'black', bins=9)
+plt.xlabel('Percentage of Produced Debris Emplaced in the Asteroid Belt (Earth Masses)')
+plt.ylabel('Number of Simulations')
+plt.savefig('percentage_histogram.pdf')
