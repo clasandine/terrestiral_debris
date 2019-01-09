@@ -1,0 +1,44 @@
+import os
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+#changes font to larger size
+import matplotlib.font_manager
+import pylab as plb
+path = '/projects/b1068/claudia/smashGT-goodruns/'
+os.chdir('/projects/b1068/claudia/smashGT-goodruns/')
+eccentricity = []
+inclination = []
+semi_major = []
+plb.rcParams['font.size'] = 14
+#enter directories containing data for asteroid debris
+for path,subdir,files in os.walk(path):
+ 	for name in subdir:
+ 		if name.endswith('CONT'):
+ 			os.chdir(path)
+ 			os.chdir('CONT')
+ 			#print(os.getcwd())
+ 			num_lines = sum(1 for line in open('mars_asteroid_belt.txt'))
+ 			with open('mars_asteroid_belt.txt', 'r', newline='') as data:
+ 				readlines = data.read()
+ 				array = readlines.split()
+ 				asteroid_belt = list(map(float,array))
+ 				for i in range(0, num_lines-1):
+ 					eccentricity.append(asteroid_belt[5*i+3])
+ 					inclination.append(asteroid_belt[5*i+4])
+ 					semi_major.append(asteroid_belt[5*i+2])
+os.chdir('/projects/b1068/claudia/imperfect/solarsystem')
+size = 0.5
+plt.scatter(semi_major, inclination, color='green', s= size)
+plt.xlim(1, 4.5)
+plt.xlabel('Semi-Major Axis (AU)')
+plt.ylabel('Inclination (Degrees)')
+plt.title('Simulated Asteroids')
+plt.savefig('inclination.pdf')
+plt.scatter(semi_major, eccentricity, color='green', s= size)
+plt.xlim(1, 4.5)
+plt.ylim(0,1)
+plt.xlabel('Semi-Major Axis (AU)')
+plt.ylabel('Eccentricity')
+plt.title('Simulated Asteroids')
+plt.savefig('eccentricity.pdf')
