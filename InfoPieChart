@@ -1,0 +1,49 @@
+import os
+os.chdir('/projects/b1068/claudia/smashGT-goodruns')
+import os.path
+path = '/projects/b1068/claudia/smashGT-goodruns'
+percentage_survived = []
+percentage_same = []
+percentage_diff = []
+percentage_lost = []
+percentage_asteroid = []
+for path,dirs,files in os.walk(path):
+	for name in dirs:
+		if name.endswith('CONT'):	
+			os.chdir(path)
+			os.chdir('CONT')
+			print(os.getcwd())
+			num_lines = sum(1 for line in open('debris.dat'))
+			num_lines2 = sum(1 for line in open('mars_asteroid_belt.txt'))
+			with open('debris.dat', 'r', newline='') as data:
+				readthelines = data.read()
+				array = readthelines.split()
+				debrisdat = list(map(float,array))
+				lost_count = []
+				same_count = []
+				diff_count = []
+				survived_count = []
+				for i in range(0, num_lines-1):
+					if debrisdat[5*i+4] < 0:
+						lost_count.append('lost')
+					if debrisdat[5*i+1] == debrisdat[5*i+4] and debrisdat[5*i+4] > 0 and debrisdat[5*i+1] > 0:
+						same_count.append('same')
+					if debrisdat[5*i+3] == debrisdat[5*i+4] and debrisdat[5*i+4] > 0 and debrisdat[5*i+3] > 0:
+						survived_count.append('survived')
+					if debrisdat[5*i+1] != debrisdat[5*i+4] and debrisdat[5*i+4] > 0 and debrisdat[5*i+1] > 0:
+						diff_count.append('different')
+			percentage_lost.append(len(lost_count)/num_lines)
+			percentage_diff.append(len(diff_count)/num_lines)
+			percentage_same.append(len(same_count)/num_lines)
+			percentage_asteroid.append(num_lines2/num_lines)
+			percentage_survived.append((len(survived_count)-num_lines2)/num_lines)
+print('Percentage of Asteroid Debris: ')
+print(percentage_asteroid)
+print('Percentage Accreted Same: ')
+print(percentage_same)
+print('Percentage Accreted Different: ')
+print(percentage_diff)
+print('Lost: ')
+print(percentage_lost)
+print('Percentage survived: ')
+print(percentage_survived)
