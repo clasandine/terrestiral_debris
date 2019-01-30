@@ -1,0 +1,104 @@
+from os import chdir, getcwd
+import itertools
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+#Whichever run you are looking at, example for Run21
+chdir('/projects/b1068/claudia/smashGT-full/Run21/OUT/CONT')
+print(getcwd())
+time = []
+inclination = []
+semi = []
+eccent = []
+time2 = []
+inclination2 = []
+semi2 = []
+eccent2 = [] 
+time3 = []
+inclination3 = []
+semi3 = []
+eccent3 = []
+time4 = []
+semi4 = []
+inclination4 = []
+eccent4 = []
+time5 = []
+semi5 = []
+inclination5 = []
+eccent5 = []
+time6 = []
+semi6 = []
+inclination6 = []
+eccent6 = []
+time7 = []
+semi7 = []
+inclination7 = []
+eccent7 = []
+num_lines = sum(1 for line in open('follow.all'))
+#Determine what numbers and how many for loops should go here by determining index numbers of embryos in a simulation, sample one below
+with open('follow.all', 'r', newline='') as data:
+	readthelines = data.read()
+	array = readthelines.split()
+	follow = list(map(float,array))
+	for i in range(0, num_lines-1):
+#Here it equals 7, but the number should be the index number of an embryo in the simulation
+		if follow[6*i+1] == 7:
+			time.append(follow[6*i])
+			inclination.append(follow[6*i+4])
+			semi.append(follow[6*i+2])
+			eccent.append(follow[6*i+3])
+	for i in range(0, num_lines-1):
+		if follow[6*i+1] == 13:
+			time2.append(follow[6*i])
+			inclination2.append(follow[6*i+4])
+			semi2.append(follow[6*i+2])
+			eccent2.append(follow[6*i+3])
+	for i in range(0, num_lines-1):
+		if follow[6*i+1] == 14:
+			time3.append(follow[6*i])
+			inclination3.append(follow[6*i+4])
+			semi3.append(follow[6*i+2])
+			eccent3.append(follow[6*i+3])
+	for i in range(0, num_lines-1):
+		if follow[6*i+1] == 19:
+			time4.append(follow[6*i])
+			inclination4.append(follow[6*i+4])
+			semi4.append(follow[6*i+2])
+			eccent4.append(follow[6*i+3])
+	for i in range(0, num_lines-1):
+	 	if follow[6*i+1] == 21:
+	 		time5.append(follow[6*i])
+	 		inclination5.append(follow[6*i+4])
+	 		semi5.append(follow[6*i+2])
+	 		eccent5.append(follow[6*i+3])
+	for i in range(0, num_lines-1):
+	 	if follow[6*i+1] == 26:
+	 		time6.append(follow[6*i])
+	 		inclination6.append(follow[6*i+4])
+	 		semi6.append(follow[6*i+2])
+	 		eccent6.append(follow[6*i+3])
+	for i in range(0, num_lines-1):
+	 	if follow[6*i+1] == 47:
+	 		time7.append(follow[6*i])
+	 		inclination7.append(follow[6*i+4])
+	 		semi7.append(follow[6*i+2])
+	 		eccent7.append(follow[6*i+3])
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(time,semi, s= .15,color='blue')
+ax.scatter(time2,semi2, s= .15,color='green')
+ax.scatter(time3,semi3, s= .15,color='cyan')
+ax.scatter(time4,semi4, s= .15,color='red')
+ax.scatter(time5,semi5, s= .15,color='magenta')
+ax.scatter(time6,semi6, s=.15 ,color='orange')
+ax.scatter(time7,semi7, s=.15, color='pink')
+plt.ylim(0,3.5)
+ratio = 0.61
+xleft, xright = ax.get_xlim()
+ybottom, ytop = ax.get_ylim()
+ax.set_aspect(abs((xright-xleft)/(ybottom-ytop-1.5))*ratio)
+plt.xlabel('Time (Years)')
+plt.ylabel('Semi-Major Axis (AU)')
+plt.title('Semi-Major Axis vs. Time for Embryos')
+plt.savefig('embryo_orbits.pdf')
