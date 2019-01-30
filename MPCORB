@@ -1,0 +1,47 @@
+import os
+import random
+import matplotlib.font_manager
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import pylab as plb
+plb.rcParams['font.size'] = 14
+numbers = []
+semi_major = []
+eccentricity = []
+inclination = []
+os.chdir('/projects/b1068/claudia/imperfect/solarsystem')
+with open('MPCORB.dat', 'r') as data:
+	for line in data:
+		linesplit = line.split()
+		numbers.append(linesplit)
+	for i in range(0, len(numbers)-1):
+		if float(numbers[i][1]) < 14:
+			semi_major.append(float(numbers[i][10]))
+			eccentricity.append(float(numbers[i][8]))
+			inclination.append((float(numbers[i][7])))
+
+size = .5
+#condense from about 28,000 lines of data to 2,000 for easier visuals
+random_number = 2000
+condensed_sm = random.sample(semi_major, random_number)
+condensed_inc = random.sample(inclination, random_number)
+condensed_ecc = random.sample(eccentricity, random_number)
+
+
+plt.scatter(condensed_sm, condensed_inc, s= size, color='blue')
+plt.xlim(1, 4.5)
+plt.ylim(0,65)
+plt.xlabel('Semi-Major Axis (AU)')
+plt.ylabel('Inclination (Degrees)')
+plt.title('Known Asteroids (MPCORB)')
+plt.savefig('test2.pdf')
+
+plt.scatter(condensed_sm, condensed_ecc, s= size, color='blue')
+plt.xlim(1, 4.5)
+plt.ylim(0,1)
+plt.xlabel('Semi-Major Axis (AU)')
+plt.ylabel('Eccentricity')
+plt.title('Known Asteroids (MPCORB)')
+plt.savefig('test.pdf')
+
